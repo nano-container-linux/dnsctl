@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Lint
+        run: go vet ./...
+      - name: Test
+        run: go test ./...
+
+  build-matrix:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            runner: ubuntu-latest
+            ext: ""
+          - goos: linux
+            goarch: arm64
+            runner: ubuntu-24.04-arm
+            ext: ""
+          - goos: darwin
+            goarch: amd64
+            runner: macos-13
+            ext: ""
+          - goos: darwin
+            goarch: arm64
+            runner: macos-14
+            ext: ""
+          - goos: windows
+            goarch: amd64
+            runner: windows-latest
+            ext: .exe
+          - goos: windows
+            goarch: arm64
+            runner: windows-11-arm
+            ext: .exe
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Build binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          out="dist/dnsctl-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
+          go build -trimpath -ldflags='-s -w' -o "$out" .
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dnsctl-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/dnsctl-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}

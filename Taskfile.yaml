@@ -1,0 +1,39 @@
+version: '3'
+
+tasks:
+  default:
+    desc: Liste les tâches disponibles
+    silent: true
+    cmds:
+      - task --list
+
+  build:
+    desc: Compile le binaire dnsctl
+    cmds:
+      - mkdir -p bin
+      - pkgx go build -o bin/dnsctl .
+
+  test:
+    desc: Exécute les tests
+    cmds:
+      - pkgx go test ./...
+
+  lint:
+    desc: Lance le lint Go (vet)
+    cmds:
+      - pkgx go vet ./...
+
+  run:
+    desc: Lance dnsctl
+    cmds:
+      - pkgx go run . --help
+
+  tidy:
+    desc: Synchronise go.mod/go.sum
+    cmds:
+      - pkgx go mod tidy
+
+  release:
+    desc: Prépare une release via GitHub Actions (build matrix native)
+    cmds:
+      - echo "Release builds are produced by GitHub Actions matrix (linux/macos/windows amd64+arm64)."
