@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,6 +23,7 @@ jobs:
         run: go test ./...
 
   build-matrix:
+    name: Build (${{ matrix.goos }}-${{ matrix.goarch }})
     needs: test
     strategy:
       fail-fast: false
@@ -71,3 +73,13 @@ jobs:
         with:
           name: dnsctl-${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist/dnsctl-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}
+
+  build-summary:
+    name: Build Summary
+    if: ${{ always() }}
+    needs: build-matrix
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate matrix result
+        run: |
+          test "${{ needs.build-matrix.result }}" = "success"
