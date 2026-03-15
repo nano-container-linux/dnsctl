@@ -1,3 +1,5 @@
+replace github.com/nano-container-linux/libdnsd => ../libdnsd
+
 module dnsctl
 
 go 1.25.6
