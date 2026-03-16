@@ -34,16 +34,21 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.20'
-      - name: Install task (go-task)
-        run: |
-          go install github.com/go-task/task/v3/cmd/task@latest
-          echo "PATH=$(go env GOPATH)/bin:$PATH" >> $GITHUB_ENV
-      - name: Build (native via Taskfile)
+      - name: Build (native)
         env:
           TARGET_OS: ${{ matrix.os }}
           TARGET_ARCH: ${{ matrix.arch }}
         run: |
-          task -v build
+          GOOS=$(go env GOOS)
+          GOARCH=$(go env GOARCH)
+          echo "Runner reports $GOOS/$GOARCH"
+          if [ "$GOOS" != "${{ matrix.os }}" ] || [ "$GOARCH" != "${{ matrix.arch }}" ]; then
+            echo "Runner OS/ARCH mismatch: expected ${{ matrix.os }}/${{ matrix.arch }} but got $GOOS/$GOARCH"
+            exit 1
+          fi
+          mkdir -p out
+          echo "Building dnsctl for $GOOS/$GOARCH"
+          go build -o out/dnsctl-${{ matrix.os }}-${{ matrix.arch }} .
       - name: Upload built binary
         uses: actions/upload-artifact@v4
         with:
