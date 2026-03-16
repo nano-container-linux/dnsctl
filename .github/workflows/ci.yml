@@ -37,10 +37,7 @@ jobs:
             goarch: arm64
             runner: ubuntu-24.04-arm
             ext: ""
-          - goos: darwin
-            goarch: amd64
-            runner: macos-13
-            ext: ""
+          # darwin/amd64 removed: macOS hosted runner macos-13 not available for this org
           - goos: darwin
             goarch: arm64
             runner: macos-14
