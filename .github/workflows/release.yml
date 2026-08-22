@@ -1,80 +1,93 @@
-name: Release (multi-runner artifacts via Taskfile)
+name: Release
+
+# Builds the same six targets as ci.yml, on the same runners, and attaches
+# them to a GitHub release.
+#
+# This lane previously carried its own, divergent copy of the build and never
+# produced a release: it built into out/ but uploaded from bin/, pinned Go
+# 1.20 against a go.mod that asks for 1.26.4, ran the linux/arm64 leg on an
+# amd64 runner behind a guard that then failed it, created the release with
+# the archived actions/create-release, and passed no `files:` to the upload
+# step. Mirroring ci.yml removes the divergence rather than repairing it
+# twice.
 on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag'
+        description: 'Release tag (e.g. v1.2.3)'
         required: true
+  push:
+    tags: ['v*']
+
+# Creating a release and uploading assets needs write access; the default
+# token is read-only.
+permissions:
+  contents: write
 
 jobs:
   build:
-    runs-on: ${{ matrix.runs_on }}
+    name: Build (${{ matrix.goos }}-${{ matrix.goarch }})
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - name: linux-amd64
-            runs_on: ubuntu-latest
-            os: linux
-            arch: amd64
-          - name: linux-arm64
-            runs_on: ubuntu-latest
-            os: linux
-            arch: arm64
-          - name: windows-amd64
-            runs_on: windows-latest
-            os: windows
-            arch: amd64
-          - name: macos-arm64
-            runs_on: macos-latest
-            os: darwin
-            arch: arm64
+          - goos: linux
+            goarch: amd64
+            runner: ubuntu-latest
+            ext: ""
+          - goos: linux
+            goarch: arm64
+            runner: ubuntu-24.04-arm
+            ext: ""
+          # darwin/amd64 omitted: the macos-13 hosted runner is not available
+          # for this org (same reason as ci.yml).
+          - goos: darwin
+            goarch: arm64
+            runner: macos-14
+            ext: ""
+          - goos: windows
+            goarch: amd64
+            runner: windows-latest
+            ext: .exe
+          - goos: windows
+            goarch: arm64
+            runner: windows-11-arm
+            ext: .exe
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
-          go-version: '1.20'
-      - name: Build (native)
-        env:
-          TARGET_OS: ${{ matrix.os }}
-          TARGET_ARCH: ${{ matrix.arch }}
+          go-version-file: go.mod
+          cache: true
+      - name: Build binary
+        shell: bash
         run: |
-          GOOS=$(go env GOOS)
-          GOARCH=$(go env GOARCH)
-          echo "Runner reports $GOOS/$GOARCH"
-          if [ "$GOOS" != "${{ matrix.os }}" ] || [ "$GOARCH" != "${{ matrix.arch }}" ]; then
-            echo "Runner OS/ARCH mismatch: expected ${{ matrix.os }}/${{ matrix.arch }} but got $GOOS/$GOARCH"
-            exit 1
-          fi
-          mkdir -p out
-          echo "Building dnsctl for $GOOS/$GOARCH"
-          go build -o out/dnsctl-${{ matrix.os }}-${{ matrix.arch }} .
-      - name: Upload built binary
+          set -euo pipefail
+          mkdir -p dist
+          out="dist/dnsctl-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
+          go build -trimpath -ldflags='-s -w' -o "$out" .
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dnsctl-${{ matrix.os }}-${{ matrix.arch }}
-          path: bin/dnsctl-${{ matrix.os }}-${{ matrix.arch }}*
+          name: dnsctl-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/dnsctl-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}
 
   publish:
+    name: Publish release
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Download build artifacts
+      - name: Download every built binary
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-      - name: Create GitHub release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Attach binaries to the release
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.tag }}
-          release_name: Release ${{ github.event.inputs.tag }}
-          draft: false
-          prerelease: false
-      - name: Upload assets to release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.event.inputs.tag }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          files: artifacts/**/*
+          # Fail loudly rather than publishing an empty release, which is what
+          # the previous lane would have done had it ever got this far.
+          fail_on_unmatched_files: true
