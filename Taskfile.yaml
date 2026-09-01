@@ -7,11 +7,22 @@ tasks:
     cmds:
       - task --list
 
+  # Generic build: runs natively on the runner matching the TARGET_OS/TARGET_ARCH
   build:
-    desc: Compile le binaire dnsctl
+    desc: Build for the given TARGET_OS/TARGET_ARCH (native only)
+    vars:
+      target_os: "${TARGET_OS}"
+      target_arch: "${TARGET_ARCH}"
     cmds:
+      - test "$(go env GOOS)" = "{{.target_os}}" || (echo "Runner GOOS $(go env GOOS) != TARGET_OS {{.target_os}}" && exit 1)
+      - test "$(go env GOARCH)" = "{{.target_arch}}" || (echo "Runner GOARCH $(go env GOARCH) != TARGET_ARCH {{.target_arch}}" && exit 1)
+      - rm -f bin/dnsctl-{{.target_os}}-{{.target_arch}}* || true
       - mkdir -p bin
-      - pkgx go build -o bin/dnsctl .
+      - pkgx go build -o bin/dnsctl-{{.target_os}}-{{.target_arch}} .
+
+  # per-OS/ARCH specific build tasks removed; use 'task build TARGET_OS=... TARGET_ARCH=...'
+
+  # Note: 'build:target' removed; use 'task build TARGET_OS=<os> TARGET_ARCH=<arch>'
 
   test:
     desc: Exécute les tests
@@ -32,8 +43,3 @@ tasks:
     desc: Synchronise go.mod/go.sum
     cmds:
       - pkgx go mod tidy
-
-  release:
-    desc: Prépare une release via GitHub Actions (build matrix native)
-    cmds:
-      - echo "Release builds are produced by GitHub Actions matrix (linux/macos/windows amd64+arm64)."
