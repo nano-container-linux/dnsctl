@@ -4,7 +4,7 @@ go 1.26.4
 
 require (
 	github.com/hashicorp/hcl/v2 v2.25.0
-	github.com/nano-container-linux/libdnsd v0.0.0-20260910143953-78dfe9aa0a14
+	github.com/nano-container-linux/libdnsd v0.0.0-20260919140057-c7baa9172488
 	github.com/spf13/cobra v1.10.2
 )
 
@@ -24,7 +24,7 @@ require (
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 	golang.org/x/tools v0.49.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa // indirect
-	google.golang.org/grpc v1.83.2 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260706201446-f0a921348800 // indirect
+	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
