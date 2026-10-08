@@ -19,8 +19,8 @@ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/mitchellh/go-wordwrap v1.0.1 h1:TLuKupo69TCn6TQSyGxwI1EblZZEsQ0vMlAFQflz0v0=
 github.com/mitchellh/go-wordwrap v1.0.1/go.mod h1:R62XHJLzvMFRBbcrT7m7WgmE1eOyTSsCt+hzestvNj0=
-github.com/nano-container-linux/libdnsd v0.0.0-20260919140057-c7baa9172488 h1:AmfUmAfQLY8zeWxqnXgyUMLEJi6Qq0pPPv/UIuJPe7U=
-github.com/nano-container-linux/libdnsd v0.0.0-20260919140057-c7baa9172488/go.mod h1:KrKg3ijvGrWw8IpUGKyMcHKfLF8AubapILV/FLnKksw=
+github.com/nano-container-linux/libdnsd v0.0.0-20261004211352-8247159cde88 h1:vlnWLPVUKyBb9LYZ3G3dLGSa1jzExtaSD/6a1Zrjnd4=
+github.com/nano-container-linux/libdnsd v0.0.0-20261004211352-8247159cde88/go.mod h1:napZyo/823MtZIWkEFcmtQKFBWK3l/IYCxxEME6OUo0=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/spf13/cobra v1.10.2 h1:DMTTonx5m65Ic0GOoRY2c16WCbHxOOw6xxezuLaBpcU=
 github.com/spf13/cobra v1.10.2/go.mod h1:7C1pvHqHw5A4vrJfjNwvOdzYu0Gml16OCs2GRiTUUS4=

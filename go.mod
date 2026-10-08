@@ -4,7 +4,7 @@ go 1.27.1
 
 require (
 	github.com/hashicorp/hcl/v2 v2.25.0
-	github.com/nano-container-linux/libdnsd v0.0.0-20260919140057-c7baa9172488
+	github.com/nano-container-linux/libdnsd v0.0.0-20261004211352-8247159cde88
 	github.com/spf13/cobra v1.10.2
 )
 
