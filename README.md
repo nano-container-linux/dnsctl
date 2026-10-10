@@ -9,6 +9,13 @@
 - SSH signing with private key or ssh-agent
 - HCL config file support (`/etc/dnsctl.hcl`, `~/.config/dnsctl/dnsctl.hcl`)
 
+## Project layout
+
+- `cmd/`: CLI commands and config loading
+- `internal/client/`: private gRPC/signing implementation used by the CLI binary
+
+`internal/client` is intentionally private to this module (not importable by external projects).
+
 ## Build
 
 ```sh

@@ -1,12 +1,12 @@
 package main
 
 import (
-"dnsctl/cmd"
-"log"
+	"dnsctl/cmd"
+	"log"
 )
 
 func main() {
-if err := cmd.Execute(); err != nil {
-log.Fatal(err)
-}
+	if err := cmd.Execute(); err != nil {
+		log.Fatal(err)
+	}
 }
